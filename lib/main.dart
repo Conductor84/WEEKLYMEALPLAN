@@ -26,6 +26,7 @@ Future<void> _initializeApp() async {
   await GroceryService.init();
   await SettingsService.init();
   await RecipeService.seedRecipes();
+  await IngredientService.seedIngredients();
 }
 
 class WeeklyMealPlanApp extends StatelessWidget {

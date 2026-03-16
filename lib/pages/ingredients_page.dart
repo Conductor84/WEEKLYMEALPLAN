@@ -13,6 +13,8 @@ class IngredientsPage extends StatefulWidget {
 
 class _IngredientsPageState extends State<IngredientsPage> {
   List<Ingredient> _ingredients = [];
+  String _searchQuery = '';
+  final _searchCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -20,10 +22,22 @@ class _IngredientsPageState extends State<IngredientsPage> {
     _refresh();
   }
 
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
   void _refresh() {
     setState(() {
       _ingredients = IngredientService.getAllIngredients();
     });
+  }
+
+  List<Ingredient> get _filtered {
+    if (_searchQuery.isEmpty) return _ingredients;
+    final q = _searchQuery.toLowerCase();
+    return _ingredients.where((i) => i.name.toLowerCase().contains(q)).toList();
   }
 
   Future<void> _showAddEditDialog([Ingredient? existing]) async {
@@ -161,6 +175,7 @@ class _IngredientsPageState extends State<IngredientsPage> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final displayed = _filtered;
 
     return Scaffold(
       appBar: AppBar(
@@ -173,42 +188,77 @@ class _IngredientsPageState extends State<IngredientsPage> {
         icon: const Icon(Icons.add),
         label: const Text('Add Ingredient'),
       ),
-      body: _ingredients.isEmpty
-          ? const Center(
-              child: Text(
-                'No ingredients yet.\nTap + to add one.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+            child: TextField(
+              controller: _searchCtrl,
+              decoration: InputDecoration(
+                hintText: 'Search ingredients…',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          setState(() => _searchQuery = '');
+                        },
+                      )
+                    : null,
+                border: const OutlineInputBorder(),
+                isDense: true,
               ),
-            )
-          : ListView.separated(
-              padding: const EdgeInsets.only(bottom: 100),
-              itemCount: _ingredients.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
-              itemBuilder: (_, i) {
-                final ing = _ingredients[i];
-                return ListTile(
-                  title: Text(ing.name),
-                  subtitle: Text(
-                      '${ing.caloriesPerUnit.toStringAsFixed(0)} cal / ${ing.unit}'
-                      '${ing.proteinPerUnit > 0 ? '  •  ${ing.proteinPerUnit.toStringAsFixed(1)}g protein' : ''}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, size: 20),
-                        onPressed: () => _showAddEditDialog(ing),
-                      ),
-                      IconButton(
-                        icon:
-                            const Icon(Icons.delete, size: 20, color: Colors.red),
-                        onPressed: () => _delete(ing),
-                      ),
-                    ],
-                  ),
-                );
-              },
+              onChanged: (v) => setState(() => _searchQuery = v),
             ),
+          ),
+          Expanded(
+            child: _ingredients.isEmpty
+                ? const Center(
+                    child: Text(
+                      'No ingredients yet.\nTap + to add one.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  )
+                : displayed.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'No ingredients match your search.',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.only(bottom: 100),
+                        itemCount: displayed.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemBuilder: (_, i) {
+                          final ing = displayed[i];
+                          return ListTile(
+                            title: Text(ing.name),
+                            subtitle: Text(
+                                '${ing.caloriesPerUnit.toStringAsFixed(0)} cal / ${ing.unit}'
+                                '${ing.proteinPerUnit > 0 ? '  •  ${ing.proteinPerUnit.toStringAsFixed(1)}g protein' : ''}'),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit, size: 20),
+                                  onPressed: () => _showAddEditDialog(ing),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete,
+                                      size: 20, color: Colors.red),
+                                  onPressed: () => _delete(ing),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
