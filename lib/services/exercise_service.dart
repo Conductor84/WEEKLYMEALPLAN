@@ -24,7 +24,7 @@ class ExerciseService {
   // ── Lifecycle ────────────────────────────────────────────────────────────
 
   static Future<void> init() async {
-    _box = await Hive.openBox<String>(_boxName);
+    _box = Hive.box<String>(_boxName);
     await _loadTodaySteps();
     _startListening();
   }

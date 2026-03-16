@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 import 'pages/home_page.dart';
 import 'pages/weekly_planner_page.dart';
@@ -7,6 +6,7 @@ import 'pages/grocery_list_page.dart';
 import 'pages/recipe_maker_page.dart';
 import 'pages/ingredients_page.dart';
 import 'pages/exercise_page.dart';
+import 'services/hive_service.dart';
 import 'services/grocery_service.dart';
 import 'services/ingredient_service.dart';
 import 'services/meal_plan_service.dart';
@@ -21,7 +21,8 @@ Future<void> main() async {
 }
 
 Future<void> _initializeApp() async {
-  await Hive.initFlutter();
+  // HiveService must run first – it initialises Hive and opens all boxes.
+  await HiveService.init();
   await RecipeService.init();
   await IngredientService.init();
   await MealPlanService.init();
