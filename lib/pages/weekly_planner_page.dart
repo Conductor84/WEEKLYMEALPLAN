@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../models/meal_plan.dart';
 import '../models/recipe.dart';
+import '../services/exercise_service.dart';
 import '../services/meal_plan_service.dart';
 import '../services/recipe_service.dart';
 import '../services/settings_service.dart';
@@ -37,7 +38,17 @@ class _WeeklyPlannerPageState extends State<WeeklyPlannerPage> {
   void initState() {
     super.initState();
     _calorieLimit = SettingsService.getSettings().dailyCalorieLimit;
+    // Rebuild when step count changes so exercise deduction stays live.
+    ExerciseService.todayStepsNotifier.addListener(_onExerciseUpdate);
   }
+
+  @override
+  void dispose() {
+    ExerciseService.todayStepsNotifier.removeListener(_onExerciseUpdate);
+    super.dispose();
+  }
+
+  void _onExerciseUpdate() => setState(() {});
 
   Recipe? _getRecipe(String? recipeId) {
     if (recipeId == null) return null;
@@ -49,6 +60,10 @@ class _WeeklyPlannerPageState extends State<WeeklyPlannerPage> {
     return MealPlanService.getMealPlan(_selectedWeek, day, mealType);
   }
 
+  /// Net calories for a day = food calories − exercise calories burned (today only).
+  ///
+  /// Exercise calories are only deducted for the day that matches today's
+  /// day-of-week name so the deduction tracks the phone's live step count.
   int _dailyCalories(String day) {
     int total = 0;
     for (final mt in kMealTypes) {
@@ -58,6 +73,15 @@ class _WeeklyPlannerPageState extends State<WeeklyPlannerPage> {
         if (r != null) total += r.totalCalories;
       }
     }
+
+    // Deduct today's exercise calories for today's day of the week.
+    // DateTime.weekday: Mon=1 … Sat=6, Sun=7  →  kDays index = weekday % 7
+    final todayDayName = kDays[DateTime.now().weekday % 7];
+    if (day == todayDayName) {
+      final exerciseCals = ExerciseService.todayCaloriesBurned.round();
+      total -= exerciseCals;
+    }
+
     return total;
   }
 
@@ -245,6 +269,10 @@ class _WeeklyPlannerPageState extends State<WeeklyPlannerPage> {
               itemCount: kDays.length,
               itemBuilder: (_, i) {
                 final day = kDays[i];
+                final todayDayName = kDays[DateTime.now().weekday % 7];
+                final exerciseCals = day == todayDayName
+                    ? ExerciseService.todayCaloriesBurned.round()
+                    : 0;
                 final calories = _dailyCalories(day);
                 final isOver = calories > _calorieLimit;
                 return _DayCard(
@@ -252,6 +280,7 @@ class _WeeklyPlannerPageState extends State<WeeklyPlannerPage> {
                   calories: calories,
                   calorieLimit: _calorieLimit,
                   isOver: isOver,
+                  exerciseCalsBurned: exerciseCals,
                   mealTypes: kMealTypes,
                   getMealPlan: (mt) => _getMealPlan(day, mt),
                   getRecipe: _getRecipe,
@@ -274,6 +303,7 @@ class _DayCard extends StatelessWidget {
   final int calories;
   final int calorieLimit;
   final bool isOver;
+  final int exerciseCalsBurned;
   final List<String> mealTypes;
   final MealPlan Function(String) getMealPlan;
   final Recipe? Function(String?) getRecipe;
@@ -285,6 +315,7 @@ class _DayCard extends StatelessWidget {
     required this.calories,
     required this.calorieLimit,
     required this.isOver,
+    required this.exerciseCalsBurned,
     required this.mealTypes,
     required this.getMealPlan,
     required this.getRecipe,
@@ -309,28 +340,53 @@ class _DayCard extends StatelessWidget {
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(12)),
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  day,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 16),
+                Row(
+                  children: [
+                    Text(
+                      day,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    const Spacer(),
+                    Icon(
+                      isOver
+                          ? Icons.warning_rounded
+                          : Icons.local_fire_department,
+                      size: 16,
+                      color: isOver ? Colors.red : Colors.orange,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$calories / $calorieLimit cal',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isOver ? Colors.red : Colors.grey[700],
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                 ),
-                const Spacer(),
-                Icon(
-                  isOver ? Icons.warning_rounded : Icons.local_fire_department,
-                  size: 16,
-                  color: isOver ? Colors.red : Colors.orange,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '$calories / $calorieLimit cal',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: isOver ? Colors.red : Colors.grey[700],
-                    fontSize: 13,
+                // Show exercise deduction row for today
+                if (exerciseCalsBurned > 0) ...[
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      const Icon(Icons.directions_walk,
+                          size: 12, color: Colors.teal),
+                      const SizedBox(width: 4),
+                      Text(
+                        '−$exerciseCalsBurned cal burned (exercise)',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.teal,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                ],
               ],
             ),
           ),
