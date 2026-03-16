@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 
 import '../models/grocery_item.dart';
 import '../models/meal_plan.dart';
@@ -80,9 +79,10 @@ class _GroceryListPageState extends State<GroceryListPage> {
       return;
     }
 
+    int _idSeq = 0;
     for (final item in accum.values) {
       final gi = GroceryItem(
-        id: const Uuid().v4(),
+        id: '${DateTime.now().millisecondsSinceEpoch}_${_idSeq++}',
         name: item.name,
         category: item.category,
         quantity: item.quantity,
@@ -156,7 +156,7 @@ class _GroceryListPageState extends State<GroceryListPage> {
                   final name = nameCtrl.text.trim();
                   if (name.isEmpty) return;
                   final item = GroceryItem(
-                    id: const Uuid().v4(),
+                    id: DateTime.now().microsecondsSinceEpoch.toString(),
                     name: name,
                     category: category,
                     isManual: true,
