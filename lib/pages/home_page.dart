@@ -4,6 +4,7 @@ import 'weekly_planner_page.dart';
 import 'grocery_list_page.dart';
 import 'recipe_maker_page.dart';
 import 'ingredients_page.dart';
+import 'exercise_page.dart';
 import 'settings_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -77,6 +78,17 @@ class HomePage extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                     builder: (_) => const IngredientsPage()),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _NavButton(
+              icon: Icons.directions_walk,
+              label: 'Exercise',
+              color: Colors.teal,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const ExercisePage()),
               ),
             ),
           ],

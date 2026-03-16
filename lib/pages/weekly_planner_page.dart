@@ -7,6 +7,7 @@ import '../models/recipe.dart';
 import '../services/meal_plan_service.dart';
 import '../services/recipe_service.dart';
 import '../services/settings_service.dart';
+import '../services/exercise_service.dart';
 
 const List<String> kDays = [
   'Sunday',
@@ -49,6 +50,20 @@ class _WeeklyPlannerPageState extends State<WeeklyPlannerPage> {
     return MealPlanService.getMealPlan(_selectedWeek, day, mealType);
   }
 
+  /// Returns today's day name (e.g. 'Monday') to match against planner rows.
+  static String _todayDayName() {
+    const weekdayNames = <int, String>{
+      DateTime.monday: 'Monday',
+      DateTime.tuesday: 'Tuesday',
+      DateTime.wednesday: 'Wednesday',
+      DateTime.thursday: 'Thursday',
+      DateTime.friday: 'Friday',
+      DateTime.saturday: 'Saturday',
+      DateTime.sunday: 'Sunday',
+    };
+    return weekdayNames[DateTime.now().weekday]!;
+  }
+
   int _dailyCalories(String day) {
     int total = 0;
     for (final mt in kMealTypes) {
@@ -57,6 +72,10 @@ class _WeeklyPlannerPageState extends State<WeeklyPlannerPage> {
         final r = _getRecipe(plan.recipeId);
         if (r != null) total += r.totalCalories;
       }
+    }
+    // Deduct calories burned from exercise for today's row.
+    if (day == _todayDayName()) {
+      total -= ExerciseService.getTodayCaloriesBurned().round();
     }
     return total;
   }
@@ -245,6 +264,10 @@ class _WeeklyPlannerPageState extends State<WeeklyPlannerPage> {
               itemCount: kDays.length,
               itemBuilder: (_, i) {
                 final day = kDays[i];
+                final isToday = day == _todayDayName();
+                final exerciseCal = isToday
+                    ? ExerciseService.getTodayCaloriesBurned().round()
+                    : 0;
                 final calories = _dailyCalories(day);
                 final isOver = calories > _calorieLimit;
                 return _DayCard(
@@ -252,6 +275,7 @@ class _WeeklyPlannerPageState extends State<WeeklyPlannerPage> {
                   calories: calories,
                   calorieLimit: _calorieLimit,
                   isOver: isOver,
+                  exerciseCaloriesBurned: exerciseCal,
                   mealTypes: kMealTypes,
                   getMealPlan: (mt) => _getMealPlan(day, mt),
                   getRecipe: _getRecipe,
@@ -274,6 +298,7 @@ class _DayCard extends StatelessWidget {
   final int calories;
   final int calorieLimit;
   final bool isOver;
+  final int exerciseCaloriesBurned;
   final List<String> mealTypes;
   final MealPlan Function(String) getMealPlan;
   final Recipe? Function(String?) getRecipe;
@@ -285,6 +310,7 @@ class _DayCard extends StatelessWidget {
     required this.calories,
     required this.calorieLimit,
     required this.isOver,
+    this.exerciseCaloriesBurned = 0,
     required this.mealTypes,
     required this.getMealPlan,
     required this.getRecipe,
@@ -317,6 +343,19 @@ class _DayCard extends StatelessWidget {
                       fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 const Spacer(),
+                if (exerciseCaloriesBurned > 0) ...[
+                  const Icon(Icons.directions_walk,
+                      size: 14, color: Colors.teal),
+                  const SizedBox(width: 2),
+                  Text(
+                    '-$exerciseCaloriesBurned',
+                    style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.teal,
+                        fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(width: 8),
+                ],
                 Icon(
                   isOver ? Icons.warning_rounded : Icons.local_fire_department,
                   size: 16,

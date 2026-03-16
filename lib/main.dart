@@ -6,11 +6,13 @@ import 'pages/weekly_planner_page.dart';
 import 'pages/grocery_list_page.dart';
 import 'pages/recipe_maker_page.dart';
 import 'pages/ingredients_page.dart';
+import 'pages/exercise_page.dart';
 import 'services/grocery_service.dart';
 import 'services/ingredient_service.dart';
 import 'services/meal_plan_service.dart';
 import 'services/recipe_service.dart';
 import 'services/settings_service.dart';
+import 'services/exercise_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +27,7 @@ Future<void> _initializeApp() async {
   await MealPlanService.init();
   await GroceryService.init();
   await SettingsService.init();
+  await ExerciseService.init();
   await RecipeService.seedRecipes();
   await IngredientService.seedIngredients();
 }
@@ -61,6 +64,7 @@ class _MainShellState extends State<MainShell> {
     GroceryListPage(),
     RecipeMakerPage(),
     IngredientsPage(),
+    ExercisePage(),
   ];
 
   @override
@@ -98,6 +102,11 @@ class _MainShellState extends State<MainShell> {
             icon: Icon(Icons.egg_alt_outlined),
             selectedIcon: Icon(Icons.egg_alt),
             label: 'Ingredients',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.directions_walk_outlined),
+            selectedIcon: Icon(Icons.directions_walk),
+            label: 'Exercise',
           ),
         ],
       ),
