@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 
 import '../models/ingredient.dart';
 import '../services/ingredient_service.dart';
@@ -129,7 +128,7 @@ class _IngredientsPageState extends State<IngredientsPage> {
                   final protein =
                       double.tryParse(proteinCtrl.text.trim()) ?? 0;
                   final ingredient = Ingredient(
-                    id: existing?.id ?? const Uuid().v4(),
+                    id: existing?.id ?? 'ing_${DateTime.now().microsecondsSinceEpoch}',
                     name: name,
                     caloriesPerUnit: cal,
                     unit: unit,

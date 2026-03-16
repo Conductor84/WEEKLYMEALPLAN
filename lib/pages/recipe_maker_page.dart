@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 
 import '../models/ingredient.dart';
 import '../models/recipe.dart';
@@ -552,7 +551,7 @@ class _RecipeFormPageState extends State<_RecipeFormPage> {
         (_mealType == 'Breakfast' || _mealType == 'Snack') ? _mealType : 'Main';
 
     final recipe = Recipe(
-      id: widget.existing?.id ?? const Uuid().v4(),
+      id: widget.existing?.id ?? 'rec_${DateTime.now().microsecondsSinceEpoch}',
       name: name,
       category: category,
       mealType: _mealType,
