@@ -12,7 +12,7 @@ class SettingsService {
   static Box<String>? _box;
 
   static Future<void> init() async {
-    _box = await Hive.openBox<String>(_boxName);
+    _box = Hive.box<String>(_boxName);
   }
 
   static Box<String> get _openBox {
