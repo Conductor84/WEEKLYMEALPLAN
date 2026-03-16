@@ -2,17 +2,20 @@ import 'dart:convert';
 
 /// Represents a single ingredient line in a recipe.
 class RecipeIngredient {
+  final String? ingredientId;
   final double quantity;
   final String unit;
   final String name;
 
   const RecipeIngredient({
+    this.ingredientId,
     required this.quantity,
     required this.unit,
     required this.name,
   });
 
   Map<String, dynamic> toMap() => {
+        if (ingredientId != null) 'ingredientId': ingredientId,
         'quantity': quantity,
         'unit': unit,
         'name': name,
@@ -20,6 +23,7 @@ class RecipeIngredient {
 
   factory RecipeIngredient.fromMap(Map<String, dynamic> map) =>
       RecipeIngredient(
+        ingredientId: map['ingredientId'] as String?,
         quantity: (map['quantity'] as num).toDouble(),
         unit: map['unit'] as String,
         name: map['name'] as String,
