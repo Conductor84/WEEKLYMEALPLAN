@@ -120,7 +120,7 @@ class _RecipeMakerPageState extends State<RecipeMakerPage>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.restaurant_menu,
-                      size: 64, color: cs.primary.withOpacity(0.5)),
+                      size: 64, color: cs.primary.withAlpha(128)),
                   const SizedBox(height: 16),
                   Text(
                     'Create a new recipe',
@@ -217,7 +217,7 @@ class _RecipeCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: color.withOpacity(0.15),
+                            color: color.withAlpha(38),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
