@@ -4,6 +4,7 @@ import 'weekly_planner_page.dart';
 import 'grocery_list_page.dart';
 import 'recipe_maker_page.dart';
 import 'ingredients_page.dart';
+import 'exercise_page.dart';
 import 'settings_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -60,7 +61,7 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 16),
             _NavButton(
               icon: Icons.restaurant_menu,
-              label: 'Recipe Maker',
+              label: 'Recipes',
               color: cs.tertiary,
               onTap: () => Navigator.push(
                 context,
@@ -77,6 +78,17 @@ class HomePage extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                     builder: (_) => const IngredientsPage()),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _NavButton(
+              icon: Icons.directions_walk,
+              label: 'Exercise',
+              color: Colors.teal,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const ExercisePage()),
               ),
             ),
           ],
@@ -108,7 +120,7 @@ class _NavButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
+          padding: const EdgeInsets.symmetric(vertical: 20),
           child: Column(
             children: [
               Icon(icon, size: 40, color: Colors.white),
