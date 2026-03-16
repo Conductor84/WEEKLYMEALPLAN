@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import 'pages/home_page.dart';
+import 'pages/weekly_planner_page.dart';
+import 'pages/grocery_list_page.dart';
+import 'pages/recipe_maker_page.dart';
+import 'pages/ingredients_page.dart';
+import 'services/grocery_service.dart';
+import 'services/ingredient_service.dart';
+import 'services/meal_plan_service.dart';
 import 'services/recipe_service.dart';
+import 'services/settings_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,6 +21,10 @@ Future<void> main() async {
 Future<void> _initializeApp() async {
   await Hive.initFlutter();
   await RecipeService.init();
+  await IngredientService.init();
+  await MealPlanService.init();
+  await GroceryService.init();
+  await SettingsService.init();
   await RecipeService.seedRecipes();
 }
 
@@ -26,50 +39,69 @@ class WeeklyMealPlanApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: const RecipeListPage(),
+      home: const MainShell(),
     );
   }
 }
 
-class RecipeListPage extends StatefulWidget {
-  const RecipeListPage({super.key});
+class MainShell extends StatefulWidget {
+  const MainShell({super.key});
 
   @override
-  State<RecipeListPage> createState() => _RecipeListPageState();
+  State<MainShell> createState() => _MainShellState();
 }
 
-class _RecipeListPageState extends State<RecipeListPage> {
-  late final List<Recipe> _recipes;
+class _MainShellState extends State<MainShell> {
+  int _currentIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _recipes = RecipeService.getAllRecipes();
-  }
+  final List<Widget> _pages = const [
+    HomePage(),
+    WeeklyPlannerPage(),
+    GroceryListPage(),
+    RecipeMakerPage(),
+    IngredientsPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Recipes'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
       ),
-      body: ListView.builder(
-        itemCount: _recipes.length,
-        itemBuilder: (context, index) {
-          final recipe = _recipes[index];
-          return ListTile(
-            title: Text(recipe.name),
-            subtitle: Text('${recipe.category} · ${recipe.totalCalories} cal'),
-            trailing: Text(
-              'P: ${recipe.macros.protein.toStringAsFixed(0)}g  '
-              'C: ${recipe.macros.carbs.toStringAsFixed(0)}g  '
-              'F: ${recipe.macros.fat.toStringAsFixed(0)}g',
-              style: const TextStyle(fontSize: 11),
-            ),
-          );
-        },
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (i) => setState(() => _currentIndex = i),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.calendar_month_outlined),
+            selectedIcon: Icon(Icons.calendar_month),
+            label: 'Planner',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.shopping_cart_outlined),
+            selectedIcon: Icon(Icons.shopping_cart),
+            label: 'Grocery',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.restaurant_menu_outlined),
+            selectedIcon: Icon(Icons.restaurant_menu),
+            label: 'Recipes',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.egg_alt_outlined),
+            selectedIcon: Icon(Icons.egg_alt),
+            label: 'Ingredients',
+          ),
+        ],
       ),
     );
   }
 }
+
+

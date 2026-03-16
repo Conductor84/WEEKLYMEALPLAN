@@ -59,6 +59,13 @@ class RecipeService {
         .toList();
   }
 
+  /// Returns all recipes with the given [mealType] (e.g. "Lunch", "Dinner").
+  static List<Recipe> getRecipesByMealType(String mealType) {
+    return getAllRecipes()
+        .where((r) => r.mealType == mealType)
+        .toList();
+  }
+
   /// Saves (or overwrites) a recipe using its [Recipe.id] as key.
   static Future<void> saveRecipe(Recipe recipe) async {
     await _openBox.put(recipe.id, recipe.toJson());
