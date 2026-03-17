@@ -15,6 +15,7 @@ dependencies:
   hive: ^2.2.3
   path_provider: ^2.1.1
   pedometer: ^3.0.0
+  uuid: ^4.4.0
   intl: ^0.19.0
 
 dev_dependencies:

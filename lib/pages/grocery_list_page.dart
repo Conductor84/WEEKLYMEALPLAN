@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/grocery_item.dart';
 import '../models/meal_plan.dart';
@@ -7,6 +8,8 @@ import '../services/grocery_service.dart';
 import '../services/meal_plan_service.dart';
 import '../services/recipe_service.dart';
 import 'weekly_planner_page.dart' show kDays, kMealTypes;
+
+const _uuid = Uuid();
 
 class GroceryListPage extends StatefulWidget {
   const GroceryListPage({super.key});
@@ -79,10 +82,9 @@ class _GroceryListPageState extends State<GroceryListPage> {
       return;
     }
 
-    int _idSeq = 0;
     for (final item in accum.values) {
       final gi = GroceryItem(
-        id: '${DateTime.now().millisecondsSinceEpoch}_${_idSeq++}',
+        id: _uuid.v4(),
         name: item.name,
         category: item.category,
         quantity: item.quantity,
@@ -156,7 +158,7 @@ class _GroceryListPageState extends State<GroceryListPage> {
                   final name = nameCtrl.text.trim();
                   if (name.isEmpty) return;
                   final item = GroceryItem(
-                    id: DateTime.now().microsecondsSinceEpoch.toString(),
+                    id: _uuid.v4(),
                     name: name,
                     category: category,
                     isManual: true,

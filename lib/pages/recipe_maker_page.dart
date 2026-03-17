@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/ingredient.dart';
 import '../models/recipe.dart';
 import '../services/ingredient_service.dart';
 import '../services/recipe_service.dart';
+
+const _uuid = Uuid();
 
 class RecipeMakerPage extends StatefulWidget {
   const RecipeMakerPage({super.key});
@@ -551,7 +554,7 @@ class _RecipeFormPageState extends State<_RecipeFormPage> {
         (_mealType == 'Breakfast' || _mealType == 'Snack') ? _mealType : 'Main';
 
     final recipe = Recipe(
-      id: widget.existing?.id ?? 'rec_${DateTime.now().microsecondsSinceEpoch}',
+      id: widget.existing?.id ?? _uuid.v4(),
       name: name,
       category: category,
       mealType: _mealType,

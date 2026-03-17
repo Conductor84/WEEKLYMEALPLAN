@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/ingredient.dart';
 import '../services/ingredient_service.dart';
+
+const _uuid = Uuid();
 
 class IngredientsPage extends StatefulWidget {
   const IngredientsPage({super.key});
@@ -128,7 +131,7 @@ class _IngredientsPageState extends State<IngredientsPage> {
                   final protein =
                       double.tryParse(proteinCtrl.text.trim()) ?? 0;
                   final ingredient = Ingredient(
-                    id: existing?.id ?? 'ing_${DateTime.now().microsecondsSinceEpoch}',
+                    id: existing?.id ?? _uuid.v4(),
                     name: name,
                     caloriesPerUnit: cal,
                     unit: unit,
